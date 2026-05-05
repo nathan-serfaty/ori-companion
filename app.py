@@ -229,7 +229,8 @@ def new_session():
     sessions[thread_id] = {
         "history": [], "profile": {},
         "exchange_count": 0,
-        "tokens": {"input": 0, "output": 0}
+        "tokens": {"input": 0, "output": 0},
+        "last_input_tokens": 0,
     }
     return jsonify({"thread_id": thread_id})
 
@@ -264,10 +265,11 @@ def chat():
 
     sess = sessions[thread_id]
     turn = sess["exchange_count"] + 1
-    total_tokens = sess["tokens"]["input"] + sess["tokens"]["output"]
+    # Use last_input_tokens as proxy for actual context window size
+    last_input = sess.get("last_input_tokens", 0)
 
-    # Thread too long
-    if total_tokens > 30000:
+    # Thread too long (context window approaching Mistral 32k limit)
+    if last_input > 28000:
         return jsonify({
             "error": "Conversation trop longue, lance un nouveau parcours pour des reponses optimales.",
             "reset_url": "/api/session/reset"
@@ -292,12 +294,26 @@ def chat():
     reply, meta = None, {}
     last_err = None
     status = "OK"
+    MAX_TOTAL_TIME = 50  # Hard cap: never exceed 50s total server-side
 
-    # Retry logic: up to 4 attempts with backoff
+    # Retry logic: up to 4 attempts with backoff, capped at MAX_TOTAL_TIME
     max_attempts = 4
     for attempt in range(max_attempts):
+        elapsed_total = time.time() - t0
+        if elapsed_total > MAX_TOTAL_TIME:
+            if not last_err:
+                last_err = "Timeout total 50s"
+            status = "TIMEOUT"
+            break
+        remaining = MAX_TOTAL_TIME - elapsed_total
+        query_timeout = min(25, remaining - 1)  # leave 1s margin
+        if query_timeout < 5:
+            if not last_err:
+                last_err = "Timeout total 50s"
+            status = "TIMEOUT"
+            break
         try:
-            response = _query_with_timeout(thread_id, user_msg, timeout_s=30)
+            response = _query_with_timeout(thread_id, user_msg, timeout_s=int(query_timeout))
             reply, meta = parse_ori_response(response)
             _log_debug(thread_id, attempt + 1, response, reply, meta)
 
@@ -305,24 +321,27 @@ def chat():
             if reply and ("LLM_ERROR" in reply or reply.strip() in ("LLM_ERROR", "LLM_ERROR {}")):
                 log.warning(f"[ORI] tid={thread_id[:8]} turn={turn} attempt={attempt+1} LLM_ERROR in response")
                 reply = None
-                if attempt < 3:
-                    time.sleep(4 + attempt * 3)
+                if attempt < 3 and (time.time() - t0) < MAX_TOTAL_TIME - 8:
+                    time.sleep(3 + attempt * 2)
                     continue
                 last_err = "LLM_ERROR"
                 status = "FAIL"
                 break
 
-            sess["tokens"]["input"]  += meta.get("input_tokens_count", 0)
-            sess["tokens"]["output"] += meta.get("output_tokens_count", 0)
+            input_tok = meta.get("input_tokens_count", 0)
+            output_tok = meta.get("output_tokens_count", 0)
+            sess["tokens"]["input"]  += input_tok
+            sess["tokens"]["output"] += output_tok
+            sess["last_input_tokens"] = input_tok  # actual context window size
             _last_query_time[thread_id] = time.time()
             break
 
         except FuturesTimeout:
-            last_err = "Timeout 25s"
+            last_err = "Timeout"
             status = "TIMEOUT"
             log.warning(f"[ORI] tid={thread_id[:8]} turn={turn} attempt={attempt+1} TIMEOUT")
-            if attempt < 2:
-                time.sleep(2 + attempt * 2)
+            if attempt < 2 and (time.time() - t0) < MAX_TOTAL_TIME - 10:
+                time.sleep(2)
                 continue
             break
 
@@ -337,22 +356,22 @@ def chat():
                 _circuit_record_429()
                 status = "RATE_LIMITED"
                 log.warning(f"[ORI] tid={thread_id[:8]} turn={turn} attempt={attempt+1} 429")
-                if attempt < 1:
-                    time.sleep(5 + attempt * 7)
+                if attempt < 1 and (time.time() - t0) < MAX_TOTAL_TIME - 12:
+                    time.sleep(5)
                     continue
                 break
             elif is_engine_busy:
                 status = "RETRY"
                 log.warning(f"[ORI] tid={thread_id[:8]} turn={turn} attempt={attempt+1} ENGINE_BUSY: {last_err[:80]}")
-                if attempt < 3:
-                    time.sleep(3 + attempt * 3)  # 3s, 6s, 9s - engine needs time
+                if attempt < 3 and (time.time() - t0) < MAX_TOTAL_TIME - 8:
+                    time.sleep(3 + attempt * 2)  # 3s, 5s, 7s
                     continue
                 break
             elif is_5xx:
                 status = "RETRY"
                 log.warning(f"[ORI] tid={thread_id[:8]} turn={turn} attempt={attempt+1} 5xx: {last_err[:80]}")
-                if attempt < 3:
-                    time.sleep((attempt + 1) * 2)
+                if attempt < 3 and (time.time() - t0) < MAX_TOTAL_TIME - 6:
+                    time.sleep(2 + attempt)
                     continue
                 break
             else:
@@ -390,7 +409,7 @@ def chat():
         sess["last_bilan"] = reply
 
     has_bilan = _detect_bilan(reply)
-    thread_warning = tok_cumul > 25000
+    thread_warning = sess.get("last_input_tokens", 0) > 24000
 
     return jsonify({
         "reply":          reply,
