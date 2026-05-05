@@ -265,11 +265,11 @@ def chat():
 
     sess = sessions[thread_id]
     turn = sess["exchange_count"] + 1
-    # Use last_input_tokens as proxy for actual context window size
+    # Use last_input_tokens as proxy for context window fullness
     last_input = sess.get("last_input_tokens", 0)
 
-    # Thread too long (context window approaching Mistral 32k limit)
-    if last_input > 28000:
+    # Thread too long (context window getting very large, quality degrades)
+    if last_input > 80000:
         return jsonify({
             "error": "Conversation trop longue, lance un nouveau parcours pour des reponses optimales.",
             "reset_url": "/api/session/reset"
@@ -409,7 +409,7 @@ def chat():
         sess["last_bilan"] = reply
 
     has_bilan = _detect_bilan(reply)
-    thread_warning = sess.get("last_input_tokens", 0) > 24000
+    thread_warning = sess.get("last_input_tokens", 0) > 60000
 
     return jsonify({
         "reply":          reply,
