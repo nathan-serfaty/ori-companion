@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>L'Etudiant — Comment choisir sa formation apres le bac ?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red: #E63946;
+  --red-dark: #C72B38;
+  --red-soft: #FFF1F2;
+  --navy: #0F1729;
+  --navy-soft: #1E2742;
+  --bg: #FAFAFB;
+  --surface: #FFFFFF;
+  --border: #EAECEF;
+  --border-strong: #D4D8DD;
+  --text-1: #0F1729;
+  --text-2: #4A5363;
+  --text-3: #8B92A0;
+  --green: #16A34A;
+  --amber-bg: #FFF7ED;
+  --amber-border: #FED7AA;
+  --amber-text: #92400E;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
+  --s-5: 20px; --s-6: 24px; --s-7: 32px; --s-8: 40px;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-xl: 20px; --r-full: 999px;
+  --sh-xs: 0 1px 2px rgba(15, 23, 41, 0.04);
+  --sh-sm: 0 2px 8px rgba(15, 23, 41, 0.06);
+  --sh-md: 0 4px 16px rgba(15, 23, 41, 0.08);
+  --sh-lg: 0 12px 40px rgba(15, 23, 41, 0.12);
+  --t: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+body{font-family:var(--font);background:var(--surface);color:var(--text-1);min-height:100vh}
+
+/* NAV */
+nav{background:var(--navy);padding:0 40px;height:56px;display:flex;align-items:center;gap:24px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none;margin-right:8px}
+.nav-logo-icon{width:32px;height:32px;background:var(--red);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:16px}
+.nav-logo-text{font-size:17px;font-weight:700;color:#fff}
+.nav-link{padding:6px 14px;border-radius:var(--r-sm);color:#9CA3AF;text-decoration:none;font-size:14px;font-weight:500;cursor:pointer;transition:color var(--t),background var(--t);border:none;background:none;font-family:var(--font)}
+.nav-link:hover{color:#fff;background:rgba(255,255,255,.08)}
+.nav-link.active{color:var(--red);background:rgba(230,57,70,.12)}
+.nav-search{margin-left:auto;display:flex;align-items:center;gap:8px}
+.nav-search input{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:var(--r-sm);padding:6px 12px;color:#fff;font-size:13px;font-family:var(--font);outline:none;width:180px;transition:border-color var(--t)}
+.nav-search input:focus{border-color:rgba(255,255,255,.4)}
+.nav-search input::placeholder{color:#6B7280}
+.nav-btn{padding:6px 16px;background:var(--red);color:#fff;border:none;border-radius:var(--r-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:background var(--t)}
+.nav-btn:hover{background:var(--red-dark)}
+
+/* BREADCRUMB */
+.bc{background:var(--bg);border-bottom:1px solid var(--border);padding:10px 40px;font-size:12px;color:var(--text-3);display:flex;align-items:center;gap:6px}
+.bc a{color:var(--text-3);text-decoration:none;cursor:pointer}.bc a:hover{color:var(--red)}
+.bc span{color:var(--text-1);font-weight:500}
+
+/* LAYOUT */
+.page{max-width:1280px;margin:0 auto;padding:36px 40px 60px;display:grid;grid-template-columns:1fr 430px;gap:48px;align-items:start}
+
+/* ARTICLE */
+.article-meta{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.atag{background:var(--red-soft);color:var(--red);border-radius:var(--r-full);padding:4px 12px;font-size:12px;font-weight:600}
+.adate{font-size:12px;color:var(--text-3)}
+article h1{font-size:32px;font-weight:700;line-height:1.2;color:var(--text-1);margin-bottom:20px;letter-spacing:-0.02em}
+.hero{width:100%;aspect-ratio:16/7;background:linear-gradient(135deg,var(--bg),#e5e7eb);border-radius:var(--r-lg);margin-bottom:24px;display:flex;align-items:center;justify-content:center;color:var(--text-3);font-size:13px;overflow:hidden;position:relative}
+.hero::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg, transparent 60%, rgba(15, 23, 41, 0.08));pointer-events:none}
+article p{font-size:16px;color:var(--text-2);line-height:1.75;margin-bottom:18px;font-weight:400}
+article blockquote{border-left:3px solid var(--red);padding:14px 20px;background:var(--red-soft);border-radius:0 var(--r-md) var(--r-md) 0;font-size:15px;color:var(--text-1);margin:20px 0;font-style:italic;line-height:1.7}
+article blockquote cite{display:block;margin-top:6px;font-size:12px;color:var(--text-3);font-style:normal}
+article h2{font-size:19px;font-weight:700;color:var(--text-1);margin:28px 0 12px;padding-bottom:8px;border-bottom:2px solid var(--bg)}
+article ul{padding-left:20px;margin-bottom:18px}
+article ul li{font-size:16px;color:var(--text-2);line-height:1.75;margin-bottom:6px}
+.author-block{display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg);border-radius:var(--r-md);margin-top:32px}
+.author-av{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--navy));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0}
+.author-name{font-size:14px;font-weight:600;color:var(--text-1)}
+.author-role{font-size:12px;color:var(--text-3)}
+.tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:24px}
+.tag-item{background:var(--bg);border:1px solid var(--border);border-radius:var(--r-full);padding:4px 12px;font-size:12px;color:var(--text-3);cursor:pointer;transition:border-color var(--t),color var(--t)}
+.tag-item:hover{border-color:var(--red);color:var(--red)}
+
+/* RELATED */
+.related{margin-top:40px;border-top:1px solid var(--border);padding-top:28px}
+.related h3{font-size:17px;font-weight:700;margin-bottom:16px}
+.related-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.rel-card{border:1px solid var(--border);border-radius:var(--r-md);overflow:hidden;cursor:pointer;transition:box-shadow 200ms ease,transform 200ms ease;box-shadow:var(--sh-xs);text-decoration:none}
+.rel-card:hover{box-shadow:var(--sh-md);transform:translateY(-2px)}
+.rel-img{height:80px;background:linear-gradient(135deg,var(--bg),#e5e7eb);display:flex;align-items:center;justify-content:center;font-size:22px}
+.rel-body{padding:10px}
+.rel-tag{font-size:11px;color:var(--red);font-weight:600;margin-bottom:3px}
+.rel-title{font-size:13px;font-weight:600;color:var(--text-1);line-height:1.4}
+
+/* SIDEBAR */
+.sidebar{position:sticky;top:80px}
+.sidebar-label{font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sidebar-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.widget-wrap{border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--sh-lg);border:1px solid var(--border);transition:box-shadow 200ms ease}
+.widget-wrap:hover{box-shadow:0 16px 48px rgba(15, 23, 41, 0.14)}
+.widget-wrap iframe{display:block;width:100%;height:680px;border:none}
+.widget-note{font-size:11px;color:var(--text-3);margin-top:10px;line-height:1.6;text-align:center;padding:0 4px}
+
+/* FOOTER */
+footer{background:var(--navy);color:#9CA3AF;padding:32px 40px;margin-top:60px;display:flex;align-items:center;justify-content:space-between;font-size:13px;flex-wrap:wrap;gap:16px}
+footer a{color:#9CA3AF;text-decoration:none;cursor:pointer;transition:color var(--t)}
+footer a:hover{color:#fff}
+.footer-links{display:flex;gap:20px}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--navy);color:#fff;padding:10px 20px;border-radius:var(--r-md);font-size:13px;box-shadow:var(--sh-lg);transition:transform .25s;z-index:999;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:900px){
+  .page{grid-template-columns:1fr;gap:32px}
+  .sidebar{position:static}
+  .related-grid{grid-template-columns:1fr 1fr}
+  nav{padding:0 16px}
+  .page{padding:24px 16px 40px}
+  footer{padding:24px 16px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/">
+    <div class="nav-logo-icon">L</div>
+    <div class="nav-logo-text">L'Etudiant</div>
+  </a>
+  <a class="nav-link" href="https://www.letudiant.fr/etudes.html" target="_blank">Formations</a>
+  <a class="nav-link" href="https://www.letudiant.fr/salons.html" target="_blank">Salons</a>
+  <a class="nav-link" href="https://www.letudiant.fr/metiers.html" target="_blank">Metiers</a>
+  <a class="nav-link" href="https://www.letudiant.fr/palmares.html" target="_blank">Classements</a>
+  <a class="nav-link active" href="/embed" target="_blank">ORI</a>
+  <div class="nav-search">
+    <input type="text" placeholder="Rechercher une formation..." onkeydown="if(event.key==='Enter')toast('Recherche : '+this.value)">
+    <button class="nav-btn" onclick="toast('Mon compte')">Mon compte</button>
+  </div>
+</nav>
+
+<div class="bc">
+  <a href="https://www.letudiant.fr" target="_blank">Accueil</a> ›
+  <a href="https://www.letudiant.fr/etudes/orientation.html" target="_blank">Orientation</a> ›
+  <span>Comment choisir sa formation apres le bac</span>
+</div>
+
+<div class="page">
+  <article>
+    <div class="article-meta">
+      <span class="atag">Orientation · Bac 2026</span>
+      <span class="adate">Mis a jour le 26 avril 2026</span>
+    </div>
+
+    <h1>Comment choisir sa formation apres le bac quand on ne sait pas encore ce qu'on veut ?</h1>
+
+    <div class="hero" style="padding: 0;">
+      <img src="/static/high-school-teacher-assisting-her-students-with-e-2023-11-27-05-12-09-utc-1.jpg" alt="Lyceen face a ses choix d'orientation" style="width: 100%; height: 100%; object-fit: cover;">
+    </div>
+
+    <p>Chaque annee, des milliers de lyceens arrivent sur Parcoursup sans avoir de projet clair. Ce n'est pas un echec — c'est une realite que peu d'adultes osent admettre. La bonne nouvelle, c'est qu'il existe des methodes pour avancer meme sans certitude.</p>
+
+    <blockquote>
+      "Le projet d'orientation ne precede pas toujours le choix de formation. Parfois, c'est l'exploration qui construit le projet."
+      <cite>— Conseil orientation L'Etudiant</cite>
+    </blockquote>
+
+    <h2>Etape 1 — Partir de ce qu'on aime, pas de ce qu'on veut etre</h2>
+    <p>La premiere etape consiste a identifier ce qu'on aime faire plutot que ce qu'on veut etre. Les centres d'interet sont des indicateurs plus fiables que les representations metier, qui changent souvent une fois confrontees a la realite.</p>
+    <ul>
+      <li>Tu aimes analyser et resoudre des problemes ? → filieres scientifiques ou techniques</li>
+      <li>Tu aimes convaincre et travailler avec des gens ? → commerce, communication, sciences humaines</li>
+      <li>Tu aimes creer et produire ? → design, arts appliques, architecture</li>
+    </ul>
+
+    <h2>Etape 2 — Comprendre les filieres pour ce qu'elles sont</h2>
+    <p>La deuxieme etape consiste a comprendre la difference entre les grandes filieres non pas sur leurs debouches supposes, mais sur leur fonctionnement concret : rythme, pedagogie, alternance possible, cout, selectivite.</p>
+    <p>Un BTS et un BUT menent souvent aux memes metiers, mais le rythme d'apprentissage et les possibilites de poursuite d'etudes sont tres differents. Choisir l'un ou l'autre sans comprendre cette difference c'est prendre un risque inutile.</p>
+
+    <h2>ORI t'accompagne en temps reel</h2>
+    <p>ORI, l'assistant d'orientation de L'Etudiant, peut t'aider dans cette demarche directement dans le widget ci-contre. Il construit ton profil au fil de la conversation et te propose des recommandations personnalisees.</p>
+
+    <div class="author-block">
+      <div class="author-av">LE</div>
+      <div>
+        <div class="author-name">Redaction L'Etudiant</div>
+        <div class="author-role">Equipe orientation · Mis a jour avril 2026</div>
+      </div>
+    </div>
+
+    <div class="tags">
+      <span class="tag-item" onclick="window.open('https://www.letudiant.fr/etudes/parcoursup.html','_blank')">Parcoursup</span>
+      <span class="tag-item" onclick="window.open('https://www.letudiant.fr/etudes/bts.html','_blank')">BTS</span>
+      <span class="tag-item" onclick="window.open('https://www.letudiant.fr/etudes/but-bachelor-universitaire-technologique.html','_blank')">BUT</span>
+      <span class="tag-item" onclick="window.open('https://www.letudiant.fr/etudes/orientation.html','_blank')">Orientation</span>
+      <span class="tag-item" onclick="toast('Terminale')">Terminale</span>
+      <span class="tag-item" onclick="toast('Bac 2026')">Bac 2026</span>
+    </div>
+
+    <div class="related">
+      <h3>A lire aussi</h3>
+      <div class="related-grid">
+        <div class="rel-card" onclick="window.open('https://www.letudiant.fr/etudes/apres-le-bac/bts-ou-iut-comment-choisir.html','_blank')">
+          <div class="rel-img">📊</div>
+          <div class="rel-body">
+            <div class="rel-tag">Formation</div>
+            <div class="rel-title">BTS vs BUT : comment choisir en 2026 ?</div>
+          </div>
+        </div>
+        <div class="rel-card" onclick="window.open('https://www.letudiant.fr/etudes/parcoursup.html','_blank')">
+          <div class="rel-img">🎓</div>
+          <div class="rel-body">
+            <div class="rel-tag">Parcoursup</div>
+            <div class="rel-title">Parcoursup 2026 : calendrier et conseils cles</div>
+          </div>
+        </div>
+        <div class="rel-card" onclick="window.open('https://www.letudiant.fr/etudes/alternance.html','_blank')">
+          <div class="rel-img">🏢</div>
+          <div class="rel-body">
+            <div class="rel-tag">Alternance</div>
+            <div class="rel-title">L'alternance apres le bac : avantages et pieges</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </article>
+
+  <aside class="sidebar">
+    <div class="sidebar-label">Ton assistant ORI</div>
+    <div class="widget-wrap">
+      <iframe src="/embed" title="ORI — Assistant d'orientation L'Etudiant" scrolling="no"></iframe>
+    </div>
+    <div class="widget-note">
+      ORI est alimente par le contenu de letudiant.fr.<br>
+      Ses reponses sont informatives et ne constituent pas un conseil d'orientation officiel.
+    </div>
+  </aside>
+</div>
+
+<footer>
+  <div style="display:flex;align-items:center;gap:10px">
+    <div style="width:28px;height:28px;background:var(--red);border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:13px">L</div>
+    <span style="color:#fff;font-weight:600">L'Etudiant</span>
+    <span>© 2026 Groupe Bayard</span>
+  </div>
+  <div class="footer-links">
+    <a href="https://www.letudiant.fr/informations/mentions-legales.html" target="_blank">Mentions legales</a>
+    <a href="https://www.letudiant.fr/informations/conditions-generales.html" target="_blank">CGU</a>
+    <a href="https://www.letudiant.fr/informations/politique-de-confidentialite.html" target="_blank">Confidentialite</a>
+    <a onclick="toast('Contact')">Contact</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+<script>
+let t;
+function toast(m){
+  const el=document.getElementById('toast');
+  el.textContent=m+' (demo prototype)';
+  el.classList.add('show');
+  clearTimeout(t);
+  t=setTimeout(()=>el.classList.remove('show'),2200);
+}
+</script>
+</body>
+</html>

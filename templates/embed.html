@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ORI Companion — Widget embeddable</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red: #E63946;
+  --red-dark: #C72B38;
+  --red-soft: #FFF1F2;
+  --navy: #0F1729;
+  --navy-soft: #1E2742;
+  --bg: #FAFAFB;
+  --surface: #FFFFFF;
+  --border: #EAECEF;
+  --border-strong: #D4D8DD;
+  --text-1: #0F1729;
+  --text-2: #4A5363;
+  --text-3: #8B92A0;
+  --green: #16A34A;
+  --amber-bg: #FFF7ED;
+  --amber-border: #FED7AA;
+  --amber-text: #92400E;
+  --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
+  --s-5: 20px; --s-6: 24px; --s-7: 32px; --s-8: 40px;
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-xl: 20px; --r-full: 999px;
+  --sh-xs: 0 1px 2px rgba(15, 23, 41, 0.04);
+  --sh-sm: 0 2px 8px rgba(15, 23, 41, 0.06);
+  --sh-md: 0 4px 16px rgba(15, 23, 41, 0.08);
+  --sh-lg: 0 12px 40px rgba(15, 23, 41, 0.12);
+  --t: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body{font-family:var(--font);background:var(--bg);display:flex;justify-content:center;align-items:flex-start;padding:var(--s-6) var(--s-4);min-height:100vh}
+.widget{width:100%;max-width:720px;background:var(--surface);border-radius:var(--r-xl);box-shadow:var(--sh-lg);overflow:hidden;display:flex;flex-direction:column}
+
+/* ── HEADER ── */
+.wh{background:var(--navy);padding:var(--s-4) var(--s-5);display:flex;align-items:center;gap:var(--s-3);flex-shrink:0}
+.wh-logo{width:36px;height:36px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #FF5560, #C72B38);box-shadow:inset 0 -2px 4px rgba(0,0,0,0.15);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:13px;flex-shrink:0}
+.wh-info{flex:1}
+.wh-title{font-size:15px;font-weight:600;color:#fff;letter-spacing:-0.01em}
+.wh-sub{font-size:11px;color:#9CA3AF;margin-top:1px;font-weight:400}
+.wh-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse-dot 2s infinite}
+@keyframes pulse-dot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.15);opacity:0.6}}
+.wh-status{font-size:11px;color:#9CA3AF;display:flex;align-items:center;gap:5px}
+.thread-badge{font-family:monospace;font-size:10px;background:rgba(255,255,255,0.06);border-radius:var(--r-sm);padding:3px 8px;color:#9CA3AF;margin-left:auto}
+
+/* ── TABS ── */
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--surface);flex-shrink:0}
+.tab{flex:1;padding:12px 8px;font-size:13px;font-weight:500;color:var(--text-3);border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;transition:color var(--t),border-color var(--t);display:flex;align-items:center;justify-content:center;gap:5px;font-family:var(--font)}
+.tab.active{color:var(--red);border-bottom-color:var(--red)}
+.tab:hover{color:var(--text-1)}
+.tab-num{font-size:10px;background:var(--bg);color:var(--text-3);border-radius:var(--r-full);padding:1px 6px;font-weight:600;transition:background var(--t),color var(--t)}
+.tab.active .tab-num{background:var(--red-soft);color:var(--red)}
+
+/* ── PROGRESS BAR ── */
+.progress-wrap{padding:var(--s-2) var(--s-5) 0;flex-shrink:0}
+.progress-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:var(--text-3);margin-bottom:var(--s-1)}
+.progress-bar{height:4px;background:var(--border);border-radius:var(--r-full);overflow:hidden}
+.progress-fill{height:100%;background:var(--red);border-radius:var(--r-full);transition:width var(--t);width:0%}
+
+/* ── PANELS ── */
+.panel{display:none;flex-direction:column;height:520px}
+.panel.active{display:flex}
+
+/* ── BANNERS ── */
+.banner{padding:var(--s-3) var(--s-4);font-size:12px;display:flex;align-items:center;gap:var(--s-2);flex-shrink:0}
+.banner-resume{background:#FEF3C7;border-bottom:1px solid #FDE68A;color:#78350F}
+.banner-resume .btn-resume{padding:4px 12px;background:var(--navy);color:#fff;border:none;border-radius:var(--r-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);margin-left:auto}
+.banner-resume .btn-restart{padding:4px 12px;background:none;border:none;color:#78350F;text-decoration:underline;font-size:12px;cursor:pointer;font-family:var(--font)}
+.banner-thread-warn{background:#FEF3C7;border-bottom:1px solid #FDE68A;color:#78350F}
+.banner-thread-warn .btn-dl{padding:4px 12px;background:var(--red);color:#fff;border:none;border-radius:var(--r-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);margin-left:auto}
+.banner-rate{background:var(--amber-bg);border-bottom:1px solid var(--amber-border);color:var(--amber-text)}
+.banner-rate .btn-retry{padding:4px 12px;background:var(--red);color:#fff;border:none;border-radius:var(--r-sm);font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);margin-left:auto;transition:opacity var(--t)}
+.banner-rate .btn-retry:disabled{opacity:0.4;cursor:not-allowed}
+
+/* ── CHAT ── */
+.messages{flex:1;overflow-y:auto;padding:var(--s-4);display:flex;flex-direction:column;gap:var(--s-3);scroll-behavior:smooth}
+.msg{display:flex;gap:9px;align-items:flex-start;animation:msgIn 220ms ease-out}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.msg.user{flex-direction:row-reverse}
+.av{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.av.ori{background:radial-gradient(circle at 30% 30%, #FF5560, #C72B38);color:#fff}
+.av.user{background:var(--bg);border:1px solid var(--border);color:var(--text-2)}
+.bub{max-width:80%;padding:10px 14px;border-radius:var(--r-lg);font-size:13.5px;line-height:1.65}
+.bub.ori{background:var(--surface);border:1px solid var(--border);border-top-left-radius:4px;color:var(--text-1);box-shadow:var(--sh-xs)}
+.bub.user{background:linear-gradient(135deg, var(--red) 0%, var(--red-dark) 100%);color:#fff;border-top-right-radius:4px}
+
+/* ── BILAN CARD ── */
+.bilan{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);margin-top:var(--s-2);overflow:hidden;box-shadow:var(--sh-md)}
+.bilan-hdr{background:linear-gradient(135deg, var(--red-soft), #FFFFFF);padding:10px 14px;font-size:11px;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+.bilan-row{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid var(--border);font-size:12.5px}
+.bilan-row:last-child{border:none}
+.bilan-lbl{color:var(--text-2)}
+.bilan-val{font-weight:600;text-align:right;max-width:55%;color:var(--text-1)}
+.pill{display:inline-block;padding:3px 10px;border-radius:var(--r-full);font-size:11px;font-weight:600}
+.pill.g{background:#ecfdf5;color:#166534;border:1px solid #bbf7d0}
+.pill.a{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+.pill.b{background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe}
+
+/* ── BILAN ACTION BAR ── */
+.bilan-actions{background:var(--red-soft);border-top:1px solid #FECACA;padding:var(--s-3);display:flex;gap:var(--s-2);flex-wrap:wrap}
+.btn-pdf{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;background:var(--red);color:#fff;border:none;border-radius:var(--r-md);font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font);box-shadow:var(--sh-xs);transition:background var(--t),transform var(--t),box-shadow var(--t)}
+.btn-pdf:hover{background:var(--red-dark);transform:translateY(-1px);box-shadow:var(--sh-sm)}
+.btn-pdf svg{width:14px;height:14px;fill:currentColor}
+.btn-handoff{display:inline-flex;align-items:center;gap:6px;padding:9px 14px;background:var(--surface);color:var(--red);border:1px solid var(--red);border-radius:var(--r-md);font-size:12.5px;font-weight:600;cursor:pointer;font-family:var(--font);transition:background var(--t)}
+.btn-handoff:hover{background:var(--red-soft)}
+
+/* ── PROFILE BAR ── */
+.profile-bar{background:var(--bg);border-top:1px solid var(--border);padding:10px 14px;font-size:12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;flex-shrink:0}
+.profile-bar span{color:var(--text-3)}
+.p-tag{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-full);padding:2px 9px;font-size:11px;color:var(--text-1);font-weight:500}
+
+/* ── SUGGESTIONS ── */
+.sugs{padding:0 14px 10px;display:flex;flex-wrap:wrap;gap:6px}
+.sug{font-size:12px;padding:6px 12px;border:1px solid var(--border);border-radius:var(--r-full);background:var(--surface);color:var(--text-2);cursor:pointer;font-family:var(--font);transition:border-color var(--t),color var(--t),box-shadow var(--t)}
+.sug:hover{border-color:var(--red);color:var(--red);box-shadow:var(--sh-xs)}
+
+/* ── INPUT ── */
+.input-row{padding:var(--s-3) var(--s-4);border-top:1px solid var(--border);display:flex;gap:8px;align-items:flex-end;flex-shrink:0;background:var(--surface)}
+.input-row textarea{flex:1;border:1.5px solid var(--border);border-radius:var(--r-md);padding:9px 13px;font-size:13.5px;font-family:var(--font);resize:none;outline:none;min-height:38px;max-height:100px;background:var(--surface);color:var(--text-1);line-height:1.5;transition:border-color var(--t),box-shadow var(--t)}
+.input-row textarea:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(230, 57, 70, 0.12)}
+.send{width:40px;height:40px;border-radius:50%;background:radial-gradient(circle at 30% 30%, #FF5560, #C72B38);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:var(--sh-sm);transition:transform var(--t)}
+.send:hover{transform:scale(1.05)}
+.send:active{transform:scale(0.95)}
+.send:disabled{opacity:.35;cursor:not-allowed;transform:none}
+.send svg{width:16px;height:16px;fill:#fff}
+
+/* ── TYPING ── */
+.typing-wrap{display:flex;gap:9px;align-items:flex-start}
+.typing-bub{background:var(--surface);border:1px solid var(--border);border-top-left-radius:4px;border-radius:var(--r-lg);padding:10px 14px;display:flex;gap:4px;align-items:center;box-shadow:var(--sh-xs)}
+.td{width:6px;height:6px;border-radius:50%;background:#CBD5E1;animation:td 1.2s infinite}
+.td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+@keyframes td{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}
+
+/* ── RECOMMENDATION MODULE ── */
+.rec-panel{flex:1;overflow-y:auto;padding:var(--s-4);display:flex;flex-direction:column;gap:var(--s-3)}
+.rec-profile-card{background:var(--bg);border:1px solid var(--border);border-radius:var(--r-md);padding:var(--s-3) var(--s-4)}
+.rec-profile-title{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:var(--s-2)}
+.rec-tags{display:flex;flex-wrap:wrap;gap:6px}
+.rec-tag{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-full);padding:3px 10px;font-size:12px;color:var(--text-1)}
+.rec-tag.accent{border-color:var(--red);color:var(--red);background:var(--red-soft)}
+.rec-empty{color:var(--text-3);font-size:13px;font-style:italic}
+
+/* ── COMPARISON MODULE ── */
+.comp-panel{flex:1;overflow-y:auto;padding:var(--s-4);display:flex;flex-direction:column;gap:14px}
+.comp-selector{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:4px}
+.comp-check{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;color:var(--text-1);background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);padding:6px 10px;transition:border-color var(--t);font-family:var(--font)}
+.comp-check:hover{border-color:var(--red)}
+.comp-check input{accent-color:var(--red);width:14px;height:14px}
+.comp-check.selected{border-color:var(--red);background:var(--red-soft);color:var(--text-1)}
+.comp-btn{padding:8px 18px;background:var(--red);color:#fff;border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:background var(--t)}
+.comp-btn:hover{background:var(--red-dark)}
+.comp-table-wrap{overflow-x:auto;border-radius:var(--r-md);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{background:var(--navy);color:#fff;padding:9px 12px;text-align:left;font-weight:600;white-space:nowrap;font-size:12px}
+th:first-child{min-width:120px}
+td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:var(--bg)}
+.criteria-lbl{font-weight:600;color:var(--text-3);font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+.match-tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 7px;border-radius:var(--r-full)}
+.match-high{background:#ecfdf5;color:#166534;border:1px solid #bbf7d0}
+.match-med{background:#fffbeb;color:#92400e;border:1px solid #fde68a}
+
+/* ── ETHICAL FOOTER ── */
+.ethical{background:var(--amber-bg);border-top:1px solid var(--amber-border);padding:10px 14px;font-size:11.5px;color:var(--amber-text);line-height:1.6;flex-shrink:0;display:flex;align-items:flex-start;gap:var(--s-2)}
+.ethical-icon{flex-shrink:0;margin-top:1px}
+.ethical-link{font-weight:700;text-decoration:underline;cursor:pointer;color:var(--amber-text)}
+
+/* ── MODULE HEADER ── */
+.mod-hdr{padding:var(--s-3) var(--s-4) 0;flex-shrink:0}
+.mod-hdr h3{font-size:14px;font-weight:600;color:var(--text-1);margin-bottom:3px}
+.mod-hdr p{font-size:12px;color:var(--text-2)}
+
+/* ── ERROR ── */
+.err{background:#fef2f2;border:1px solid #fecaca;border-radius:var(--r-sm);padding:9px 13px;font-size:12.5px;color:#b91c1c;margin:4px 0}
+
+/* ── TOAST ── */
+.toast{position:fixed;top:var(--s-4);left:50%;transform:translateX(-50%) translateY(-80px);background:var(--navy);color:#fff;padding:10px 20px;border-radius:var(--r-md);font-size:13px;box-shadow:var(--sh-lg);transition:transform 250ms ease;z-index:999;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* ── HANDOFF MODAL ── */
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,41,0.55);display:none;align-items:center;justify-content:center;z-index:1000;animation:fadeIn 200ms ease}
+.modal-backdrop.open{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border-radius:var(--r-lg);box-shadow:var(--sh-lg);max-width:500px;width:90%;padding:var(--s-6);animation:slideUp 200ms ease}
+@keyframes slideUp{from{transform:translateY(10px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal h2{font-size:16px;font-weight:700;color:var(--text-1);margin-bottom:var(--s-4)}
+.modal-close{position:absolute;top:var(--s-4);right:var(--s-4);background:none;border:none;font-size:20px;cursor:pointer;color:var(--text-3);padding:4px}
+.resource-card{border:1px solid var(--border);border-radius:var(--r-md);padding:var(--s-3);margin-bottom:var(--s-2);cursor:pointer;transition:border-color var(--t),background var(--t),transform var(--t);text-decoration:none;display:block}
+.resource-card:hover{border-color:var(--red);background:var(--red-soft);transform:translateY(-1px)}
+.resource-card h4{font-size:13px;font-weight:600;color:var(--text-1);margin-bottom:2px}
+.resource-card p{font-size:12px;color:var(--text-2);line-height:1.5}
+
+/* ── RESPONSIVE ── */
+@media(max-width:420px){
+  .wh{padding:var(--s-3) var(--s-4)}
+  .bub{max-width:88%}
+  .thread-badge{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="widget" id="widget">
+
+  <!-- Header -->
+  <div class="wh">
+    <div class="wh-logo">O</div>
+    <div class="wh-info">
+      <div class="wh-title">ORI Companion</div>
+      <div class="wh-sub">Assistant d'orientation · L'Etudiant</div>
+    </div>
+    <div class="wh-status" id="hdr-status">
+      <div class="wh-dot" id="hdr-dot" style="background:#f59e0b;animation:none"></div>
+      <span id="hdr-label">Connexion...</span>
+    </div>
+    <span class="thread-badge" id="thread-badge">—</span>
+  </div>
+
+  <!-- Resume banner (hidden by default) -->
+  <div class="banner banner-resume" id="banner-resume" style="display:none">
+    <span>Tu avais une conversation en cours.</span>
+    <button class="btn-resume" onclick="resumeSession()">Reprendre</button>
+    <button class="btn-restart" onclick="restartSession()">Recommencer</button>
+  </div>
+
+  <!-- Thread warning banner (hidden) -->
+  <div class="banner banner-thread-warn" id="banner-thread-warn" style="display:none">
+    <span>Ta conversation devient longue. Pense a exporter ton bilan avant qu'ORI commence a perdre le contexte.</span>
+    <button class="btn-dl" onclick="downloadPDF()">Telecharger maintenant</button>
+  </div>
+
+  <!-- Rate limit banner (hidden) -->
+  <div class="banner banner-rate" id="banner-rate" style="display:none">
+    <span id="rate-msg">ORI est tres demande. Reessaie dans <b id="rate-countdown">0</b>s.</span>
+    <button class="btn-retry" id="btn-rate-retry" onclick="retryAfterRate()" disabled>Reessayer</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('onboarding',this)">
+      <span>① Profil</span><span class="tab-num" id="tab1-num">0</span>
+    </button>
+    <button class="tab" onclick="switchTab('recommendation',this)">
+      <span>② Recommandations</span><span class="tab-num" id="tab2-num">0</span>
+    </button>
+    <button class="tab" onclick="switchTab('comparison',this)">
+      <span>③ Comparatif</span>
+    </button>
+  </div>
+
+  <!-- MODULE 1 : ONBOARDING -->
+  <div class="panel active" id="panel-onboarding">
+    <div class="mod-hdr">
+      <h3>Construis ton profil d'orientation</h3>
+      <p>Reponds aux questions d'ORI pour obtenir des recommandations personnalisees</p>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-label">Progression <span id="progress-pct">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+    <div class="messages" id="msgs-onboarding">
+      <div class="msg">
+        <div class="av ori">O</div>
+        <div class="bub ori">Bienvenue ! Je suis ORI, ton assistant d'orientation de L'Etudiant. Pour commencer, est-ce que tu peux me dire ou tu en es en ce moment — que tu sois encore au lycee, en premiere annee d'etudes, ou en train de reflechir a une reorientation ?</div>
+      </div>
+    </div>
+    <div class="sugs" id="sugs-onboarding">
+      <button class="sug" onclick="qs(this,'onboarding')">Je suis en Terminale et je ne sais pas quoi faire</button>
+      <button class="sug" onclick="qs(this,'onboarding')">J'hesite entre commerce et ingenieur</button>
+      <button class="sug" onclick="qs(this,'onboarding')">Je veux travailler dans la tech mais je suis en filiere litteraire</button>
+      <button class="sug" onclick="qs(this,'onboarding')">Je suis en L1 et je veux me reorienter</button>
+    </div>
+    <div class="profile-bar" id="profile-bar">
+      <span>Profil detecte :</span>
+      <span id="profile-tags" style="color:var(--text-3);font-style:italic">En cours de construction...</span>
+    </div>
+    <div class="input-row">
+      <textarea id="inp-onboarding" placeholder="Ta question d'orientation..." rows="1"
+        onkeydown="hk(event,'onboarding')" oninput="grow(this)"></textarea>
+      <button class="send" id="send-onboarding" onclick="send('onboarding')" disabled>
+        <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="ethical">
+      <span class="ethical-icon">⚠</span>
+      <span>ORI fournit des pistes de reflexion, pas une decision. <span class="ethical-link" onclick="openHandoff()">Trouver un conseiller →</span></span>
+    </div>
+  </div>
+
+  <!-- MODULE 2 : RECOMMANDATIONS -->
+  <div class="panel" id="panel-recommendation">
+    <div class="mod-hdr">
+      <h3>Recommandations personnalisees</h3>
+      <p>Base sur ton profil construit dans l'onglet ①</p>
+    </div>
+    <div class="rec-panel" id="rec-content">
+      <div class="rec-profile-card">
+        <div class="rec-profile-title">Ton profil actuel</div>
+        <div class="rec-tags" id="rec-profile-display">
+          <span class="rec-empty">Complete ton profil dans l'onglet ① pour debloquer les recommandations</span>
+        </div>
+      </div>
+      <div class="messages" id="msgs-recommendation" style="flex:1;padding:0;gap:12px;overflow-y:auto"></div>
+      <div class="sugs" id="sugs-recommendation" style="padding:0">
+        <button class="sug" onclick="qs(this,'recommendation')">Quelles formations correspondent a mon profil ?</button>
+        <button class="sug" onclick="qs(this,'recommendation')">Qu'est-ce qui me correspond le mieux entre une ecole et la fac ?</button>
+        <button class="sug" onclick="qs(this,'recommendation')">Est-ce que l'alternance est une bonne option pour moi ?</button>
+      </div>
+    </div>
+    <div class="input-row">
+      <textarea id="inp-recommendation" placeholder="Pose une question sur tes recommandations..." rows="1"
+        onkeydown="hk(event,'recommendation')" oninput="grow(this)"></textarea>
+      <button class="send" id="send-recommendation" onclick="send('recommendation')" disabled>
+        <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+      </button>
+    </div>
+    <div class="ethical">
+      <span class="ethical-icon">⚠</span>
+      <span>ORI fournit des pistes de reflexion, pas une decision. <span class="ethical-link" onclick="openHandoff()">Trouver un conseiller →</span></span>
+    </div>
+  </div>
+
+  <!-- MODULE 3 : COMPARATIF -->
+  <div class="panel" id="panel-comparison">
+    <div class="mod-hdr">
+      <h3>Comparatif de formations</h3>
+      <p>Compare jusqu'a 3 filieres cote a cote</p>
+    </div>
+    <div class="comp-panel">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--text-3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.04em">Selectionne les filieres a comparer</div>
+        <div class="comp-selector" id="comp-selector"></div>
+        <button class="comp-btn" onclick="doCompare()" style="margin-top:10px">Comparer →</button>
+      </div>
+      <div id="comp-result"></div>
+    </div>
+    <div class="ethical">
+      <span class="ethical-icon">⚠</span>
+      <span>ORI fournit des pistes de reflexion, pas une decision. <span class="ethical-link" onclick="openHandoff()">Trouver un conseiller →</span></span>
+    </div>
+  </div>
+
+</div>
+
+<!-- Handoff Modal -->
+<div class="modal-backdrop" id="modal-handoff">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="closeHandoff()">×</button>
+    <h2>Parler a un conseiller humain</h2>
+    <p style="font-size:13px;color:var(--text-2);margin-bottom:var(--s-4)">ORI ne remplace pas un accompagnement humain. Voici des ressources pour aller plus loin :</p>
+    <div id="handoff-resources"></div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+let threadId = null;
+let busy = {onboarding: false, recommendation: false};
+let exchanges = {onboarding: 0, recommendation: 0};
+let currentProfile = {};
+let threadWarningShown = false;
+let rateCountdownInterval = null;
+
+const PROGS = ["BTS","BUT","Licence","École de commerce","École d'ingénieurs"];
+const SVG_DL = '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>';
+
+// ── Init ──
+async function init() {
+  const sel = document.getElementById("comp-selector");
+  PROGS.forEach(p => {
+    const lbl = document.createElement("label");
+    lbl.className = "comp-check";
+    lbl.innerHTML = `<input type="checkbox" value="${p}" onchange="toggleCheck(this)"> ${p}`;
+    sel.appendChild(lbl);
+  });
+
+  // Check localStorage for existing session
+  const saved = localStorage.getItem("ori_thread_id");
+  if (saved) {
+    document.getElementById("banner-resume").style.display = "flex";
+  }
+
+  try {
+    const r = await fetch("/api/session", {method:"POST"});
+    const d = await r.json();
+    threadId = d.thread_id;
+    document.getElementById("thread-badge").textContent = threadId.slice(0,8);
+    document.getElementById("hdr-dot").style.background = "";
+    document.getElementById("hdr-dot").style.animation = "";
+    document.getElementById("hdr-label").textContent = "Connecte";
+    document.getElementById("send-onboarding").disabled = false;
+    document.getElementById("send-recommendation").disabled = false;
+  } catch(e) {
+    document.getElementById("hdr-dot").style.background = "#ef4444";
+    document.getElementById("hdr-dot").style.animation = "none";
+    document.getElementById("hdr-label").textContent = "Erreur de connexion";
+    addMsg("onboarding","ori","Impossible de contacter ORI. Verifiez que le serveur app.py est bien lance.");
+  }
+}
+
+function resumeSession() {
+  const saved = localStorage.getItem("ori_thread_id");
+  if (saved) {
+    threadId = saved;
+    document.getElementById("thread-badge").textContent = threadId.slice(0,8);
+  }
+  document.getElementById("banner-resume").style.display = "none";
+  showToast("Conversation reprise");
+}
+
+function restartSession() {
+  localStorage.removeItem("ori_thread_id");
+  document.getElementById("banner-resume").style.display = "none";
+}
+
+// ── Tab switching ──
+function switchTab(name, btn) {
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("panel-"+name).classList.add("active");
+  if (name === "recommendation") refreshRecProfile();
+}
+
+// ── Messages ──
+function addMsg(module, role, content, extra) {
+  const box = document.getElementById("msgs-"+module);
+  const div = document.createElement("div");
+  div.className = "msg " + role;
+  const av = document.createElement("div");
+  av.className = "av " + role;
+  av.textContent = role === "ori" ? "O" : "Moi";
+  const bub = document.createElement("div");
+  bub.className = "bub " + role;
+  if (role === "ori") {
+    bub.innerHTML = renderORI(content);
+    if (extra && extra.has_bilan) {
+      const actions = document.createElement("div");
+      actions.className = "bilan-actions";
+      actions.innerHTML = `
+        <button class="btn-pdf" onclick="downloadPDF()">${SVG_DL} Telecharger mon profil (PDF)</button>
+        <button class="btn-handoff" onclick="openHandoff()">Parler a un humain</button>
+      `;
+      bub.appendChild(actions);
+    }
+  } else {
+    bub.textContent = content;
+  }
+  div.appendChild(av); div.appendChild(bub);
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+let lastMsg = {onboarding: "", recommendation: ""};
+
+function addErr(module, msg, retryable) {
+  retryable = retryable !== false;
+  const box = document.getElementById("msgs-"+module);
+  const d = document.createElement("div");
+  d.className = "err";
+  d.innerHTML = "⚠ " + msg + (retryable && lastMsg[module]
+    ? ' <button onclick="retry(\''+module+'\')" style="margin-left:10px;padding:4px 12px;background:var(--red);color:#fff;border:none;border-radius:var(--r-sm);font-size:12px;cursor:pointer;font-family:var(--font)">Reessayer</button>'
+    : "");
+  box.appendChild(d); box.scrollTop = box.scrollHeight;
+}
+
+async function retry(module) {
+  const msg = lastMsg[module];
+  if (!msg) return;
+  const box = document.getElementById("msgs-"+module);
+  const errs = box.querySelectorAll(".err");
+  if (errs.length) errs[errs.length-1].remove();
+  const msgs = box.querySelectorAll(".msg.user");
+  if (msgs.length) msgs[msgs.length-1].remove();
+  document.getElementById("inp-"+module).value = msg;
+  await send(module);
+}
+
+function showTyping(module) {
+  const box = document.getElementById("msgs-"+module);
+  const d = document.createElement("div");
+  d.className = "typing-wrap"; d.id = "typing-"+module;
+  d.innerHTML = `<div class="av ori">O</div><div class="typing-bub"><div class="td"></div><div class="td"></div><div class="td"></div></div>`;
+  box.appendChild(d); box.scrollTop = box.scrollHeight;
+}
+
+function removeTyping(module) {
+  const el = document.getElementById("typing-"+module);
+  if (el) el.remove();
+}
+
+// ── Text rendering ──
+function escHtml(text) {
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function mdLite(text) {
+  try {
+    let s = escHtml(text);
+    s = s.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
+      '<a href="$2" target="_blank" rel="noopener" style="color:var(--red);text-decoration:underline">$1</a>');
+    s = s.replace(/(^|[^"=])(https?:\/\/[^\s<")\]]+)/g,
+      '$1<a href="$2" target="_blank" rel="noopener" style="color:var(--red);text-decoration:underline;word-break:break-all">$2</a>');
+    s = s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+    s = s.replace(/\*(.+?)\*/g,'<em>$1</em>');
+    s = s.replace(/\n/g,'<br>');
+    return s;
+  } catch(e) {
+    return escHtml(text).replace(/\n/g,'<br>');
+  }
+}
+
+function renderORI(content) {
+  const hasBilan = content.includes("Bilan") || content.includes("profil detect") || content.includes("Formations recommand");
+  if (hasBilan) return renderBilan(content);
+  return '<span style="font-size:13.5px;line-height:1.65">' + mdLite(content) + '</span>';
+}
+
+function renderBilan(text) {
+  const lines = text.split("\n").filter(l=>l.trim());
+  let html="", inBilan=false;
+  for (const line of lines) {
+    const l = line.trim();
+    if (l.includes("Bilan") || l.includes("profil detect")) {
+      inBilan=true;
+      html += `<div class="bilan"><div class="bilan-hdr">Bilan de profil ORI</div>`;
+      continue;
+    }
+    if (!inBilan) { html += `<p style="margin-bottom:6px;font-size:13.5px;line-height:1.65">${mdLite(l)}</p>`; continue; }
+    const m = l.match(/\*{0,2}(.+?)\*{0,2}\s*[:\-]+\s*(.+)/);
+    if (m) {
+      const key=m[1].replace(/\*/g,'').trim(), val=m[2].trim();
+      let display=val;
+      if (key.toLowerCase().includes("maturit")||key.toLowerCase().includes("niveau")) {
+        const cls = val.includes("Avanc")?"g":val.includes("construction")?"a":"b";
+        display=`<span class="pill ${cls}">${val}</span>`;
+      }
+      if (typeof display === "string" && !display.includes("pill")) display = mdLite(display);
+      html+=`<div class="bilan-row"><span class="bilan-lbl">${key}</span><span class="bilan-val">${display}</span></div>`;
+    } else if (l.startsWith("-")||l.startsWith("•")) {
+      html+=`<div class="bilan-row"><span>${mdLite(l.slice(1).trim())}</span></div>`;
+    }
+  }
+  if(inBilan) html+=`</div>`;
+  return html || `<span style="font-size:13.5px;line-height:1.65">${mdLite(text)}</span>`;
+}
+
+// ── Send message ──
+async function send(module) {
+  if (busy[module] || !threadId) return;
+  const inp = document.getElementById("inp-"+module);
+  const msg = inp.value.trim();
+  if (!msg) return;
+  inp.value=""; inp.style.height="auto";
+  const sugs = document.getElementById("sugs-"+module);
+  if (sugs) sugs.style.display="none";
+  busy[module]=true;
+  document.getElementById("send-"+module).disabled=true;
+  lastMsg[module] = msg;
+  addMsg(module,"user",msg);
+  showTyping(module);
+
+  let timeoutId = setTimeout(() => {
+    removeTyping(module);
+    busy[module]=false;
+    document.getElementById("send-"+module).disabled=false;
+    showToast("ORI a mis trop de temps, reessaie.");
+  }, 30000);
+
+  try {
+    const r = await fetch("/api/chat",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({thread_id:threadId,message:msg,module})});
+    clearTimeout(timeoutId);
+    removeTyping(module);
+
+    if (r.status === 429) {
+      const d = await r.json();
+      if (d.rate_limited) {
+        showRateBanner(d.retry_after || 30);
+        addErr(module, d.error, false);
+      } else {
+        addErr(module, d.error || "Limite atteinte");
+      }
+    } else if (r.status === 413) {
+      const d = await r.json();
+      addErr(module, d.error, false);
+      const box = document.getElementById("msgs-"+module);
+      const resetBtn = document.createElement("div");
+      resetBtn.style.cssText = "margin:8px 0";
+      resetBtn.innerHTML = '<button onclick="resetSession()" style="padding:8px 16px;background:var(--red);color:#fff;border:none;border-radius:var(--r-md);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">Recommencer un parcours</button>';
+      box.appendChild(resetBtn);
+    } else if (!r.ok) {
+      const d = await r.json().catch(()=>({}));
+      addErr(module, d.error || `Erreur ${r.status}`);
+    } else {
+      const d = await r.json();
+      addMsg(module,"ori",d.reply,{has_bilan:d.has_bilan});
+      exchanges[module]=d.exchange_count;
+      document.getElementById("tab"+(module==="onboarding"?"1":"2")+"-num").textContent=d.exchange_count;
+      if(d.profile) { currentProfile=d.profile; updateProfileBar(); }
+      // Save thread to localStorage
+      localStorage.setItem("ori_thread_id", threadId);
+      // Progress
+      updateProgress(d.exchange_count);
+      // Thread warning
+      if(d.thread_warning && !threadWarningShown) {
+        threadWarningShown = true;
+        document.getElementById("banner-thread-warn").style.display = "flex";
+      }
+    }
+  } catch(e){
+    clearTimeout(timeoutId);
+    removeTyping(module);
+    addErr(module,"Erreur reseau : "+e.message);
+  }
+  busy[module]=false;
+  document.getElementById("send-"+module).disabled=false;
+}
+
+function qs(btn, module) {
+  document.getElementById("inp-"+module).value = btn.textContent;
+  send(module);
+}
+
+// ── Progress ──
+function updateProgress(count) {
+  const pct = Math.min(100, Math.round((count / 6) * 100));
+  document.getElementById("progress-fill").style.width = pct + "%";
+  document.getElementById("progress-pct").textContent = pct + "%";
+}
+
+// ── Rate limit banner ──
+function showRateBanner(seconds) {
+  const banner = document.getElementById("banner-rate");
+  const countdown = document.getElementById("rate-countdown");
+  const btn = document.getElementById("btn-rate-retry");
+  banner.style.display = "flex";
+  btn.disabled = true;
+  let remaining = seconds;
+  countdown.textContent = remaining;
+  if (rateCountdownInterval) clearInterval(rateCountdownInterval);
+  rateCountdownInterval = setInterval(() => {
+    remaining--;
+    countdown.textContent = remaining;
+    if (remaining <= 0) {
+      clearInterval(rateCountdownInterval);
+      btn.disabled = false;
+    }
+  }, 1000);
+}
+
+function retryAfterRate() {
+  document.getElementById("banner-rate").style.display = "none";
+}
+
+// ── PDF download ──
+function downloadPDF() {
+  if (!threadId) return;
+  window.open("/api/bilan_pdf?thread_id=" + threadId, "_blank");
+}
+
+// ── Session reset ──
+async function resetSession() {
+  try {
+    const r = await fetch("/api/session/reset", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({thread_id: threadId})
+    });
+    const d = await r.json();
+    threadId = d.thread_id;
+    localStorage.setItem("ori_thread_id", threadId);
+    document.getElementById("thread-badge").textContent = threadId.slice(0,8);
+    // Clear messages
+    ["onboarding","recommendation"].forEach(m => {
+      document.getElementById("msgs-"+m).innerHTML = "";
+    });
+    document.getElementById("banner-thread-warn").style.display = "none";
+    threadWarningShown = false;
+    updateProgress(0);
+    showToast("Nouveau parcours demarre");
+  } catch(e) {
+    showToast("Erreur lors du reset");
+  }
+}
+
+// ── Handoff modal ──
+async function openHandoff() {
+  const modal = document.getElementById("modal-handoff");
+  const container = document.getElementById("handoff-resources");
+  modal.classList.add("open");
+  try {
+    const r = await fetch("/api/handoff");
+    const d = await r.json();
+    container.innerHTML = d.resources.map(res =>
+      `<a class="resource-card" href="${res.url}" target="_blank" rel="noopener">
+        <h4>${res.label}</h4>
+        <p>${res.desc}</p>
+      </a>`
+    ).join("");
+  } catch(e) {
+    container.innerHTML = '<p style="color:var(--text-3)">Impossible de charger les ressources.</p>';
+  }
+}
+
+function closeHandoff() {
+  document.getElementById("modal-handoff").classList.remove("open");
+}
+
+// Close modal on backdrop click
+document.addEventListener("click", e => {
+  if (e.target.id === "modal-handoff") closeHandoff();
+});
+
+// ── Profile display ──
+function updateProfileBar() {
+  const bar = document.getElementById("profile-tags");
+  if (!Object.keys(currentProfile).length) return;
+  bar.innerHTML = Object.entries(currentProfile)
+    .map(([k,v]) => `<span class="p-tag"><b>${k}</b> : ${v}</span>`).join("");
+}
+
+function refreshRecProfile() {
+  const el = document.getElementById("rec-profile-display");
+  if (!Object.keys(currentProfile).length) return;
+  el.innerHTML = Object.entries(currentProfile)
+    .map(([k,v]) => `<span class="rec-tag ${k==='secteur_detecte'?'accent':''}">${k}: ${v}</span>`).join("");
+}
+
+// ── Comparison ──
+function toggleCheck(cb) {
+  const checked = document.querySelectorAll("#comp-selector input:checked").length;
+  if (checked > 3) { cb.checked=false; return; }
+  cb.closest("label").classList.toggle("selected", cb.checked);
+}
+
+async function doCompare() {
+  const selected = [...document.querySelectorAll("#comp-selector input:checked")].map(i=>i.value);
+  if (selected.length < 2) { showToast("Selectionne au moins 2 filieres"); return; }
+  const r = await fetch("/api/compare",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({programmes:selected})});
+  const data = await r.json();
+  renderComparison(data, selected);
+}
+
+function renderComparison(data, progs) {
+  const res = document.getElementById("comp-result");
+  const criteria = [
+    ["Niveau","level"],["Duree","duration"],["Acces","access"],
+    ["Cout","cost"],["Taux Parcoursup","parcoursup_rate"],
+    ["Insertion 6 mois","insertion"],["Salaire debutant","salary_entry"],
+  ];
+  let html = `<div class="comp-table-wrap"><table>`;
+  html += `<tr><th>Critere</th>${progs.map(p=>`<th>${p}</th>`).join("")}</tr>`;
+  for (const [label, key] of criteria) {
+    html += `<tr><td class="criteria-lbl">${label}</td>`;
+    for (const p of progs) {
+      const val = data[p]?.[key] ?? "—";
+      let display = val;
+      if (key==="insertion") {
+        const pct = parseInt(val);
+        const cls = pct>=85?"match-high":"match-med";
+        display = `<span class="match-tag ${cls}">${val}</span>`;
+      }
+      html += `<td>${display}</td>`;
+    }
+    html += `</tr>`;
+  }
+  if (Object.keys(currentProfile).length) {
+    html += `<tr><td class="criteria-lbl">Adequation profil</td>`;
+    for (const p of progs) {
+      const match = getProfileMatch(p);
+      const cls = match==="Elevee"?"match-high":"match-med";
+      html += `<td><span class="match-tag ${cls}">${match}</span></td>`;
+    }
+    html += `</tr>`;
+  }
+  html += `</table></div>`;
+  res.innerHTML = html;
+}
+
+function getProfileMatch(prog) {
+  const sector = currentProfile["secteur_detecte"] || "";
+  const pref   = currentProfile["preference"] || "";
+  if (prog==="École d'ingénieurs" && sector.includes("ingenierie")) return "Elevee";
+  if (prog==="École de commerce" && sector.includes("commerce")) return "Elevee";
+  if (prog==="BUT" && pref.includes("alternance")) return "Elevee";
+  if (prog==="BTS" && pref.includes("alternance")) return "Elevee";
+  if (prog==="Licence" && pref.includes("academique")) return "Elevee";
+  return "Moyenne";
+}
+
+// ── Utils ──
+function hk(e, module) { if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();send(module);} }
+function grow(el) { el.style.height="auto"; el.style.height=Math.min(el.scrollHeight,100)+"px"; }
+
+let toastTimer;
+function showToast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>el.classList.remove("show"), 2500);
+}
+
+init();
+</script>
+</body>
+</html>
